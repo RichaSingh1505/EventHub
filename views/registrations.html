@@ -1,0 +1,301 @@
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+<title>Event Registrations</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<h1>All Event Registrations</h1>
+
+<div id="registrations-container"></div>
+
+<script>
+
+function loadRegistrations(){
+
+fetch("/registrations/:eventId")
+
+.then(response => {
+
+if(!response.ok){
+throw new Error("Server Error");
+}
+
+return response.json();
+
+})
+
+.then(data => {
+
+const container = document.getElementById("registrations-container");
+
+container.innerHTML = "";
+
+if(data.length === 0){
+container.innerHTML = "<p>No registrations found</p>";
+return;
+}
+
+data.forEach(reg => {
+
+const card = document.createElement("div");
+
+card.classList.add("registration-card");
+
+card.innerHTML = `
+
+<h3>Event ID: ${reg.event_id}</h3>
+
+<p><b>Name:</b> ${reg.name}</p>
+
+<p><b>Email:</b> ${reg.email}</p>
+
+<p><b>Registered At:</b> ${new Date(reg.registered_at).toLocaleString()}</p>
+
+<hr>
+
+`;
+
+container.appendChild(card);
+
+});
+
+})
+
+.catch(error => {
+
+console.log(error);
+
+document.getElementById("registrations-container").innerHTML =
+"<p>Error loading registrations</p>";
+
+});
+
+}
+
+loadRegistrations();
+
+</script>
+
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registrations | EventHub</title>
+    <style>
+        /* 1. Global Reset & Theme */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #06060c;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 2. Background Blobs */
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            top: -10%;
+        }
+
+        /* 3. Header Styling */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        h1 span {
+            color: #818cf8;
+        }
+
+        .back-btn {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { color: #ffffff; }
+
+        /* 4. Registrations Container */
+        #registrations-container {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* 5. Glass Registration Cards */
+        .registration-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            transition: 0.3s ease;
+        }
+
+        .registration-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(129, 140, 248, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .reg-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .user-icon {
+            width: 40px;
+            height: 40px;
+            background: #818cf8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .reg-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .reg-info {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .reg-info b { color: #cbd5e1; }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 15px;
+            display: block;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            border: 2px dashed rgba(255, 255, 255, 0.05);
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob"></div>
+
+    <header>
+        <a href="/event-list" class="back-btn">← Back to Dashboard</a>
+        <h1>Event <span>Registrations</span></h1>
+        <p id="event-title-display" style="color: #94a3b8; margin-top: 5px;"></p>
+    </header>
+
+    <div id="registrations-container">
+        <p style="text-align: center; width: 100%;">Fetching attendees...</p>
+    </div>
+
+    <script>
+        // Extract eventId from URL parameters (?eventId=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('eventId');
+
+        function loadRegistrations() {
+            if (!eventId) {
+                document.getElementById("registrations-container").innerHTML = 
+                    "<p class='empty-state'>Invalid Event ID</p>";
+                return;
+            }
+
+            // Corrected Fetch URL
+            fetch(`/registrations/${eventId}`)
+            .then(response => {
+                if(!response.ok) throw new Error("Server Error");
+                return response.json();
+            })
+            .then(data => {
+                const container = document.getElementById("registrations-container");
+                container.innerHTML = "";
+
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No one has signed up yet.</h3>
+                            <p>Share your event link to start gathering registrations!</p>
+                        </div>`;
+                    return;
+                }
+
+                data.forEach(reg => {
+                    const firstLetter = reg.name ? reg.name.charAt(0).toUpperCase() : '?';
+                    const card = document.createElement("div");
+                    card.classList.add("registration-card");
+
+                    card.innerHTML = `
+                        <div class="reg-header">
+                            <div class="user-icon">${firstLetter}</div>
+                            <div class="reg-name">${reg.name}</div>
+                        </div>
+                        <p class="reg-info"><b>Email:</b> ${reg.email}</p>
+                        <p class="reg-info"><b>Ticket ID:</b> #${reg.id || reg.event_id}</p>
+                        <span class="timestamp">Joined on ${new Date(reg.registered_at).toLocaleDateString()} at ${new Date(reg.registered_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    `;
+
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("registrations-container").innerHTML = 
+                    "<div class='empty-state'>Error loading registration data.</div>";
+            });
+        }
+
+        loadRegistrations();
+    </script>
+</body>
+</html>

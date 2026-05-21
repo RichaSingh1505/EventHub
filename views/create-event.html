@@ -1,0 +1,288 @@
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+<title>Create Event</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<h1>Create Event</h1>
+
+<form id="eventForm" enctype="multipart/form-data">
+
+<input type="text" name="title" placeholder="Title" required>
+
+<textarea name="description" placeholder="Description"></textarea>
+
+<input type="date" name="date" required>
+
+<input type="text" name="location" placeholder="Location">
+
+<input type="file" name="image">
+
+<button type="submit">Create Event</button>
+
+</form>
+
+<script>
+
+document.getElementById("eventForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const formData = new FormData(this);
+
+fetch("/create-event",{
+method:"POST",
+body:formData
+})
+.then(res => res.text())
+.then(data=>{
+alert("Event Created");
+window.location.href="/event-list";
+});
+
+});
+
+</script>
+
+</body>
+</html>
+ -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event | EventHub</title>
+    <style>
+        /* 1. Reset & Global Theme */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #06060c;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 2. Background Decoration (Matches Landing/Login) */
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            filter: blur(100px);
+            border-radius: 50%;
+            opacity: 0.15;
+            z-index: -1;
+            animation: move 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes move {
+            from { transform: translate(-30px, -30px); }
+            to { transform: translate(30px, 30px); }
+        }
+
+        /* 3. The Glass Form Card */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            padding: 40px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        h1 span {
+            color: #818cf8;
+        }
+
+        /* 4. Form Styling - Fixed Vertical Layout */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        /* Custom styling for file input */
+        input[type="file"] {
+            padding: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-right: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #818cf8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(129, 140, 248, 0.2);
+        }
+
+        /* 5. Submit Button */
+        button {
+            margin-top: 10px;
+            padding: 16px;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(129, 140, 248, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob" style="top: -200px; left: -100px;"></div>
+    <div class="blob" style="bottom: -200px; right: -100px;"></div>
+
+    <main class="card">
+        <h1>Create <span>Event</span></h1>
+
+        <form id="eventForm" enctype="multipart/form-data">
+            <div class="input-group">
+                <label>Event Title</label>
+                <input type="text" name="title" placeholder="Enter event name" required>
+            </div>
+
+            <div class="input-group">
+                <label>Description</label>
+                <textarea name="description" placeholder="Describe your event..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" name="date" required>
+                </div>
+                <div class="input-group">
+                    <label>Location</label>
+                    <input type="text" name="location" placeholder="City or Venue">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Cover Image</label>
+                <input type="file" name="image" accept="image/*">
+            </div>
+
+            <button type="submit">Publish Event</button>
+        </form>
+
+        <a href="/event-list" class="back-link">← Cancel and return to events</a>
+    </main>
+
+    <script>
+        document.getElementById("eventForm").addEventListener("submit", function(e){
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch("/create-event", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.text())
+            .then(data => {
+                alert("Event Created Successfully!");
+                window.location.href = "/event-list";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error creating event.");
+            });
+        });
+    </script>
+
+</body>
+</html>

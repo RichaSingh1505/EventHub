@@ -1,0 +1,196 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+<title>Signup</title>
+</head>
+
+<body>
+
+<h2>Signup</h2>
+
+<form action="/signup" method="POST">
+
+<input type="text" name="name" placeholder="Enter Name" required>
+<br><br>
+
+<input type="email" name="email" placeholder="Enter Email" required>
+<br><br>
+
+<input type="password" name="password" placeholder="Enter Password" required>
+<br><br>
+
+<button type="submit">Signup</button>
+
+</form>
+
+<p>Already have account? <a href="/login">Login</a></p>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup | EventHub</title>
+    <style>
+        /* 1. Global Setup */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: #06060c;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 2. Background Decoration */
+        .blob {
+            position: absolute;
+            width: 550px;
+            height: 550px;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            filter: blur(120px);
+            border-radius: 50%;
+            opacity: 0.15;
+            z-index: -1;
+            animation: move 18s infinite alternate ease-in-out;
+        }
+
+        @keyframes move {
+            from { transform: translate(-40px, 40px); }
+            to { transform: translate(40px, -40px); }
+        }
+
+        /* 3. The Glass Signup Card */
+        .signup-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* 4. Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #818cf8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(129, 140, 248, 0.3);
+            filter: brightness(1.1);
+        }
+
+        /* 5. Switch Link */
+        .login-link {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .login-link a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .login-link a:hover {
+            color: #818cf8;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob" style="top: -250px; left: -150px;"></div>
+    <div class="blob" style="bottom: -250px; right: -150px;"></div>
+
+    <main class="signup-card">
+        <h2>Join Event<span>Hub</span></h2>
+        <p class="subtitle">Start managing events like a pro.</p>
+
+        <form action="/signup" method="POST">
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="password" name="password" placeholder="Create Password" required>
+            
+            <button type="submit">Create Account</button>
+        </form>
+
+        <p class="login-link">
+            Already have an account? <a href="/login">Log In</a>
+        </p>
+    </main>
+
+</body>
+</html>

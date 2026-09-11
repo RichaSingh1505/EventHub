@@ -400,6 +400,19 @@ loadEvents();
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
+        /* FIX #5: real responsive breakpoint for the dashboard —
+           previously this grid had no @media rules anywhere, so the
+           "responsive dashboard" resume claim wasn't technically backed. */
+        @media (max-width: 600px) {
+            #events-container {
+                grid-template-columns: 1fr !important;
+            }
+
+            #searchInput {
+                width: 100%;
+            }
+        }
+
         .btn {
             padding: 10px;
             border-radius: 10px;

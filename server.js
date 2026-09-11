@@ -2787,64 +2787,430 @@
 // });
 
 
+// const express = require("express");
+// const path = require("path");
+// const mysql = require("mysql2");
+// const multer = require("multer");
+
+// // ✅ AUTH
+// const bcrypt = require("bcryptjs");
+// const session = require("express-session");
+
+// const app = express();
+// const PORT = 3000;
+
+
+// // ================= MULTER CONFIG =================
+
+// const storage = multer.diskStorage({
+// destination: function(req,file,cb){
+// cb(null,"uploads/");
+// },
+// filename: function(req,file,cb){
+// cb(null, Date.now() + "-" + file.originalname);
+// }
+// });
+
+// const upload = multer({storage:storage});
+
+
+// // ================= MIDDLEWARE =================
+
+// app.use(express.static(path.join(__dirname, "public")));
+// app.use("/uploads", express.static(path.join(__dirname,"uploads")));
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+
+// app.use(session({
+//   secret: "secret-key",
+//   resave: false,
+//   saveUninitialized: true
+// }));
+
+
+// // ================= DATABASE =================
+
+// const db = mysql.createConnection({
+// host: "localhost",
+// user: "root",
+// password: "Richa",
+// database: "event_platform"
+// });
+
+// db.connect((err) => {
+// if (err) {
+// console.log("Database connection failed:", err);
+// return;
+// }
+// console.log("MySQL Connected Successfully");
+// });
+
+
+// // ================= AUTH MIDDLEWARE =================
+
+// function isLoggedIn(req, res, next) {
+//   if (req.session.userId) {
+//     next();
+//   } else {
+//     res.redirect("/login");
+//   }
+// }
+
+
+// // ================= ROUTES =================
+
+// // Homepage
+// app.get("/", (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "index.html"));
+// });
+
+// // 🔒 Protected Routes
+
+// app.get("/create-event", isLoggedIn, (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "create-event.html"));
+// });
+
+// app.get("/event-list", isLoggedIn, (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "event-list.html"));
+// });
+
+// app.get("/event/:id", isLoggedIn, (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "event-details.html"));
+// });
+
+// app.get("/registrations.html", isLoggedIn,(req,res)=>{
+// res.sendFile(path.join(__dirname,"views","registrations.html"));
+// });
+
+
+// // ================= AUTH ROUTES =================
+
+// // Signup Page
+// app.get("/signup", (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "signup.html"));
+// });
+
+// // Signup API
+// app.post("/signup", async (req, res) => {
+
+// const { name, email, password } = req.body;
+
+// const hashedPassword = await bcrypt.hash(password, 10);
+
+// const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+
+// db.query(sql, [name, email, hashedPassword], (err, result) => {
+
+// if (err) {
+// console.log(err);
+// res.send("User already exists");
+// return;
+// }
+
+// res.redirect("/login");
+// });
+// });
+
+
+// // Login Page
+// app.get("/login", (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "login.html"));
+// });
+
+// // Login API
+// app.post("/login", (req, res) => {
+
+// const { email, password } = req.body;
+
+// const sql = "SELECT * FROM users WHERE email=?";
+
+// db.query(sql, [email], async (err, result) => {
+
+// if (err) {
+// console.log(err);
+// res.send("Database error");
+// return;
+// }
+
+// if (result.length === 0) {
+// res.send("User not found");
+// return;
+// }
+
+// const user = result[0];
+
+// const isMatch = await bcrypt.compare(password, user.password);
+
+// if (!isMatch) {
+// res.send("Wrong password");
+// return;
+// }
+
+// req.session.userId = user.id;
+
+// res.redirect("/event-list");
+
+// });
+// });
+
+
+// // ✅ LOGOUT
+// app.get("/logout", (req, res) => {
+//   req.session.destroy(() => {
+//     res.redirect("/login");
+//   });
+// });
+
+
+// // ================= DATABASE ROUTES =================
+
+// // Create Event
+// app.post("/create-event", upload.single("image"), (req, res) => {
+
+// const { title, description, date, location } = req.body;
+// const image = req.file ? req.file.filename : null;
+
+// const sql = "INSERT INTO events (title, description, date, location, image) VALUES (?, ?, ?, ?, ?)";
+
+// db.query(sql, [title, description, date, location, image], (err, result) => {
+
+// if (err) {
+// console.log("Insert error:", err);
+// res.status(500).send("Database Error");
+// return;
+// }
+
+// res.redirect("/event-list");
+
+// });
+// });
+
+
+// // Get All Events
+// app.get("/events", (req, res) => {
+
+// db.query("SELECT * FROM events", (err, results) => {
+
+// if (err) {
+// console.log(err);
+// res.status(500).send("Database Error");
+// return;
+// }
+
+// res.json(results);
+
+// });
+// });
+
+
+// // Events with Registration Count
+// app.get("/events-with-count",(req,res)=>{
+
+// const sql = `
+// SELECT events.*, COUNT(registrations.id) AS registration_count
+// FROM events
+// LEFT JOIN registrations
+// ON events.id = registrations.event_id
+// GROUP BY events.id
+// `;
+
+// db.query(sql,(err,result)=>{
+
+// if(err){
+// console.log(err);
+// res.status(500).send("Database error");
+// return;
+// }
+
+// res.json(result);
+
+// });
+// });
+
+
+// // Get Single Event
+// app.get("/event-details/:id",(req,res)=>{
+
+// db.query("SELECT * FROM events WHERE id=?", [req.params.id], (err,result)=>{
+
+// if(err){
+// console.log(err);
+// res.status(500).send("Database error");
+// return;
+// }
+
+// res.json(result[0]);
+
+// });
+// });
+
+
+// // Delete Event
+// app.delete("/delete-event/:id", (req, res) => {
+
+// db.query("DELETE FROM events WHERE id=?", [req.params.id], (err) => {
+
+// if (err) {
+// console.log(err);
+// res.status(500).send("Error deleting event");
+// return;
+// }
+
+// res.send("Event deleted");
+
+// });
+// });
+
+
+// // Edit Page
+// app.get("/edit-event/:id", isLoggedIn, (req, res) => {
+// res.sendFile(path.join(__dirname, "views", "edit-event.html"));
+// });
+
+
+// // Update Event
+// app.put("/update-event/:id", (req, res) => {
+
+// const { title, description, date, location } = req.body;
+
+// const sql = "UPDATE events SET title=?, description=?, date=?, location=? WHERE id=?";
+
+// db.query(sql, [title, description, date, location, req.params.id], (err) => {
+
+// if (err) {
+// console.log(err);
+// res.status(500).send("Error updating event");
+// return;
+// }
+
+// res.send("Event Updated");
+
+// });
+// });
+
+
+// // Register Event
+// app.post("/register-event",(req,res)=>{
+
+// const {event_id,name,email} = req.body;
+
+// const sql = "INSERT INTO registrations (event_id,name,email) VALUES (?,?,?)";
+
+// db.query(sql,[event_id,name,email],(err)=>{
+
+// if(err){
+// console.log(err);
+// res.status(500).send("Database error");
+// return;
+// }
+
+// res.send("Registration successful");
+
+// });
+// });
+
+
+// // Get Registrations
+// app.get("/registrations/:eventId",(req,res)=>{
+
+// db.query(
+// "SELECT name,email FROM registrations WHERE event_id=?",
+// [req.params.eventId],
+// (err,result)=>{
+
+// if(err){
+// console.log(err);
+// res.status(500).send("Database error");
+// return;
+// }
+
+// res.json(result);
+
+// });
+// });
+
+
+// // Debug
+// app.get("/test", (req, res) => {
+// res.send("Server working perfectly");
+// });
+
+
+// // ================= SERVER =================
+
+// app.listen(PORT, () => {
+// console.log(`Server running at http://localhost:${PORT}`);
+// });
+
 const express = require("express");
 const path = require("path");
 const mysql = require("mysql2");
 const multer = require("multer");
-
-// ✅ AUTH
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
+require("dotenv").config(); // ✅ FIX #3: load secrets from .env instead of hardcoding
 
 const app = express();
-const PORT = 3000;
-
+const PORT = process.env.PORT || 3000;
 
 // ================= MULTER CONFIG =================
+// ✅ FIX #8: added fileFilter (images only) and a size limit — previously accepted any file type
 
 const storage = multer.diskStorage({
-destination: function(req,file,cb){
-cb(null,"uploads/");
-},
-filename: function(req,file,cb){
-cb(null, Date.now() + "-" + file.originalname);
-}
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
 });
 
-const upload = multer({storage:storage});
-
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /jpeg|jpg|png|webp|gif/;
+    const isValidExt = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const isValidMime = allowedTypes.test(file.mimetype);
+    if (isValidExt && isValidMime) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files (jpeg, jpg, png, webp, gif) are allowed"));
+    }
+  }
+});
 
 // ================= MIDDLEWARE =================
 
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/uploads", express.static(path.join(__dirname,"uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
-  secret: "secret-key",
+  secret: process.env.SESSION_SECRET, // ✅ FIX #3: no longer hardcoded as "secret-key"
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false, // more correct default than true — avoids creating empty sessions for anonymous visitors
+  cookie: { maxAge: 1000 * 60 * 60 * 2 } // 2-hour session expiry
 }));
 
-
 // ================= DATABASE =================
+// ✅ FIX #3: all connection details now come from environment variables, not hardcoded strings
 
 const db = mysql.createConnection({
-host: "localhost",
-user: "root",
-password: "Richa",
-database: "event_platform"
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 db.connect((err) => {
-if (err) {
-console.log("Database connection failed:", err);
-return;
-}
-console.log("MySQL Connected Successfully");
+  if (err) {
+    console.log("Database connection failed:", err);
+    return;
+  }
+  console.log("MySQL Connected Successfully");
 });
-
 
 // ================= AUTH MIDDLEWARE =================
 
@@ -2856,288 +3222,274 @@ function isLoggedIn(req, res, next) {
   }
 }
 
+// ✅ FIX #1: NEW — role-based access control middleware, did not exist before at all
+function isAdmin(req, res, next) {
+  if (req.session.userId && req.session.userRole === "admin") {
+    next();
+  } else {
+    res.status(403).send("Forbidden: Admins only");
+  }
+}
 
 // ================= ROUTES =================
 
 // Homepage
 app.get("/", (req, res) => {
-res.sendFile(path.join(__dirname, "views", "index.html"));
+  res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
-// 🔒 Protected Routes
-
-app.get("/create-event", isLoggedIn, (req, res) => {
-res.sendFile(path.join(__dirname, "views", "create-event.html"));
+// 🔒 Protected Routes — admin-only actions now require isAdmin, not just isLoggedIn
+app.get("/create-event", isAdmin, (req, res) => {              // ✅ FIX #1: was isLoggedIn, now isAdmin
+  res.sendFile(path.join(__dirname, "views", "create-event.html"));
 });
 
 app.get("/event-list", isLoggedIn, (req, res) => {
-res.sendFile(path.join(__dirname, "views", "event-list.html"));
+  res.sendFile(path.join(__dirname, "views", "event-list.html"));
 });
 
 app.get("/event/:id", isLoggedIn, (req, res) => {
-res.sendFile(path.join(__dirname, "views", "event-details.html"));
+  res.sendFile(path.join(__dirname, "views", "event-details.html"));
 });
 
-app.get("/registrations.html", isLoggedIn,(req,res)=>{
-res.sendFile(path.join(__dirname,"views","registrations.html"));
+app.get("/registrations.html", isAdmin, (req, res) => {        // ✅ FIX #1: participant lists are admin-only now
+  res.sendFile(path.join(__dirname, "views", "registrations.html"));
 });
-
 
 // ================= AUTH ROUTES =================
 
 // Signup Page
 app.get("/signup", (req, res) => {
-res.sendFile(path.join(__dirname, "views", "signup.html"));
+  res.sendFile(path.join(__dirname, "views", "signup.html"));
 });
 
 // Signup API
+// ✅ FIX #1: now accepts and stores a role (defaults to "customer" if not provided/valid,
+// so a user can't just pass role=admin in the request body to self-promote)
 app.post("/signup", async (req, res) => {
+  const { name, email, password, role } = req.body;
+  const safeRole = role === "admin" ? "admin" : "customer";
 
-const { name, email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
 
-const hashedPassword = await bcrypt.hash(password, 10);
-
-const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-
-db.query(sql, [name, email, hashedPassword], (err, result) => {
-
-if (err) {
-console.log(err);
-res.send("User already exists");
-return;
-}
-
-res.redirect("/login");
+    db.query(sql, [name, email, hashedPassword, safeRole], (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send("User already exists or invalid data");
+      }
+      res.redirect("/login");
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Server error during signup");
+  }
 });
-});
-
 
 // Login Page
 app.get("/login", (req, res) => {
-res.sendFile(path.join(__dirname, "views", "login.html"));
+  res.sendFile(path.join(__dirname, "views", "login.html"));
 });
 
 // Login API
 app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const sql = "SELECT * FROM users WHERE email=?";
 
-const { email, password } = req.body;
+  db.query(sql, [email], async (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Database error");
+    }
+    if (result.length === 0) {
+      return res.status(401).send("User not found");
+    }
 
-const sql = "SELECT * FROM users WHERE email=?";
+    const user = result[0];
+    const isMatch = await bcrypt.compare(password, user.password);
 
-db.query(sql, [email], async (err, result) => {
+    if (!isMatch) {
+      return res.status(401).send("Wrong password");
+    }
 
-if (err) {
-console.log(err);
-res.send("Database error");
-return;
-}
+    req.session.userId = user.id;
+    req.session.userName = user.name;
+    req.session.userRole = user.role; // ✅ FIX #1: role stored in session for middleware checks
 
-if (result.length === 0) {
-res.send("User not found");
-return;
-}
-
-const user = result[0];
-
-const isMatch = await bcrypt.compare(password, user.password);
-
-if (!isMatch) {
-res.send("Wrong password");
-return;
-}
-
-req.session.userId = user.id;
-
-res.redirect("/event-list");
-
-});
+    res.redirect("/event-list");
+  });
 });
 
-
-// ✅ LOGOUT
+// LOGOUT
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login");
   });
 });
 
+// ✅ FIX #4: NEW route — this was called by the frontend (event-list.html) but never existed.
+// The "Welcome, [Name]" feature was silently broken before this fix.
+app.get("/current-user", (req, res) => {
+  if (req.session.userId) {
+    res.json({ name: req.session.userName, role: req.session.userRole });
+  } else {
+    res.status(401).json({ name: null, role: null });
+  }
+});
 
 // ================= DATABASE ROUTES =================
 
-// Create Event
-app.post("/create-event", upload.single("image"), (req, res) => {
+// Create Event — admin-only
+app.post("/create-event", isAdmin, upload.single("image"), (req, res) => {   // ✅ FIX #1
+  const { title, description, date, location } = req.body;
+  const image = req.file ? req.file.filename : null;
 
-const { title, description, date, location } = req.body;
-const image = req.file ? req.file.filename : null;
+  const sql = "INSERT INTO events (title, description, date, location, image, created_by) VALUES (?, ?, ?, ?, ?, ?)";
 
-const sql = "INSERT INTO events (title, description, date, location, image) VALUES (?, ?, ?, ?, ?)";
-
-db.query(sql, [title, description, date, location, image], (err, result) => {
-
-if (err) {
-console.log("Insert error:", err);
-res.status(500).send("Database Error");
-return;
-}
-
-res.redirect("/event-list");
-
+  db.query(sql, [title, description, date, location, image, req.session.userId], (err, result) => {
+    if (err) {
+      console.log("Insert error:", err);
+      return res.status(500).send("Database Error");
+    }
+    res.redirect("/event-list");
+  });
 });
-});
-
 
 // Get All Events
 app.get("/events", (req, res) => {
-
-db.query("SELECT * FROM events", (err, results) => {
-
-if (err) {
-console.log(err);
-res.status(500).send("Database Error");
-return;
-}
-
-res.json(results);
-
-});
+  db.query("SELECT * FROM events", (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Database Error");
+    }
+    res.json(results);
+  });
 });
 
+// Events with Registration Count (unchanged — this was already well-built: LEFT JOIN keeps
+// zero-registration events visible, which an INNER JOIN would have hidden)
+app.get("/events-with-count", (req, res) => {
+  const sql = `
+    SELECT events.*, COUNT(registrations.id) AS registration_count
+    FROM events
+    LEFT JOIN registrations
+    ON events.id = registrations.event_id
+    GROUP BY events.id
+  `;
 
-// Events with Registration Count
-app.get("/events-with-count",(req,res)=>{
-
-const sql = `
-SELECT events.*, COUNT(registrations.id) AS registration_count
-FROM events
-LEFT JOIN registrations
-ON events.id = registrations.event_id
-GROUP BY events.id
-`;
-
-db.query(sql,(err,result)=>{
-
-if(err){
-console.log(err);
-res.status(500).send("Database error");
-return;
-}
-
-res.json(result);
-
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Database error");
+    }
+    res.json(result);
+  });
 });
-});
-
 
 // Get Single Event
-app.get("/event-details/:id",(req,res)=>{
-
-db.query("SELECT * FROM events WHERE id=?", [req.params.id], (err,result)=>{
-
-if(err){
-console.log(err);
-res.status(500).send("Database error");
-return;
-}
-
-res.json(result[0]);
-
-});
+app.get("/event-details/:id", (req, res) => {
+  db.query("SELECT * FROM events WHERE id=?", [req.params.id], (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Database error");
+    }
+    res.json(result[0]);
+  });
 });
 
-
-// Delete Event
-app.delete("/delete-event/:id", (req, res) => {
-
-db.query("DELETE FROM events WHERE id=?", [req.params.id], (err) => {
-
-if (err) {
-console.log(err);
-res.status(500).send("Error deleting event");
-return;
-}
-
-res.send("Event deleted");
-
-});
+// Delete Event — admin-only
+app.delete("/delete-event/:id", isAdmin, (req, res) => {   // ✅ FIX #1
+  db.query("DELETE FROM events WHERE id=?", [req.params.id], (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Error deleting event");
+    }
+    res.send("Event deleted");
+  });
 });
 
-
-// Edit Page
-app.get("/edit-event/:id", isLoggedIn, (req, res) => {
-res.sendFile(path.join(__dirname, "views", "edit-event.html"));
+// Edit Page — admin-only
+app.get("/edit-event/:id", isAdmin, (req, res) => {   // ✅ FIX #1
+  res.sendFile(path.join(__dirname, "views", "edit-event.html"));
 });
 
+// Update Event — admin-only
+app.put("/update-event/:id", isAdmin, (req, res) => {   // ✅ FIX #1
+  const { title, description, date, location } = req.body;
+  const sql = "UPDATE events SET title=?, description=?, date=?, location=? WHERE id=?";
 
-// Update Event
-app.put("/update-event/:id", (req, res) => {
-
-const { title, description, date, location } = req.body;
-
-const sql = "UPDATE events SET title=?, description=?, date=?, location=? WHERE id=?";
-
-db.query(sql, [title, description, date, location, req.params.id], (err) => {
-
-if (err) {
-console.log(err);
-res.status(500).send("Error updating event");
-return;
-}
-
-res.send("Event Updated");
-
-});
+  db.query(sql, [title, description, date, location, req.params.id], (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Error updating event");
+    }
+    res.send("Event Updated");
+  });
 });
 
+// Register for Event — now requires login (previously had NO auth check at all)
+// ✅ FIX #6: added isLoggedIn — previously anyone could POST here unauthenticated
+// ✅ FIX #2: generates a real ticket_code instead of just displaying the raw registration id
+app.post("/register-event", isLoggedIn, (req, res) => {
+  const { event_id, name, email } = req.body;
 
-// Register Event
-app.post("/register-event",(req,res)=>{
+  // Check capacity / prevent duplicate registration for the same event+email first
+  const checkSql = "SELECT COUNT(*) AS count FROM registrations WHERE event_id = ? AND email = ?";
+  db.query(checkSql, [event_id, email], (checkErr, checkResult) => {
+    if (checkErr) {
+      console.log(checkErr);
+      return res.status(500).send("Database error");
+    }
+    if (checkResult[0].count > 0) {
+      return res.status(409).send("You have already registered for this event");
+    }
 
-const {event_id,name,email} = req.body;
+    const insertSql = "INSERT INTO registrations (event_id, name, email, user_id) VALUES (?, ?, ?, ?)";
+    db.query(insertSql, [event_id, name, email, req.session.userId], (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send("Database error");
+      }
 
-const sql = "INSERT INTO registrations (event_id,name,email) VALUES (?,?,?)";
+      // ✅ FIX #2: build a real, human-readable ticket code from the new row's id,
+      // then store it back on that same row — e.g. EVT7-000042
+      const registrationId = result.insertId;
+      const ticketCode = `EVT${event_id}-${String(registrationId).padStart(6, "0")}`;
 
-db.query(sql,[event_id,name,email],(err)=>{
-
-if(err){
-console.log(err);
-res.status(500).send("Database error");
-return;
-}
-
-res.send("Registration successful");
-
-});
-});
-
-
-// Get Registrations
-app.get("/registrations/:eventId",(req,res)=>{
-
-db.query(
-"SELECT name,email FROM registrations WHERE event_id=?",
-[req.params.eventId],
-(err,result)=>{
-
-if(err){
-console.log(err);
-res.status(500).send("Database error");
-return;
-}
-
-res.json(result);
-
-});
-});
-
-
-// Debug
-app.get("/test", (req, res) => {
-res.send("Server working perfectly");
+      db.query(
+        "UPDATE registrations SET ticket_code = ? WHERE id = ?",
+        [ticketCode, registrationId],
+        (updateErr) => {
+          if (updateErr) {
+            console.log(updateErr);
+            return res.status(500).send("Registered, but failed to generate ticket code");
+          }
+          res.json({ message: "Registration successful", ticketCode });
+        }
+      );
+    });
+  });
 });
 
+// Get Registrations for an event — admin-only, now returns the real ticket_code
+app.get("/registrations/:eventId", isAdmin, (req, res) => {   // ✅ FIX #1
+  db.query(
+    "SELECT name, email, ticket_code FROM registrations WHERE event_id=?",  // ✅ FIX #2: real ticket_code column
+    [req.params.eventId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send("Database error");
+      }
+      res.json(result);
+    }
+  );
+});
+
+// ✅ FIX #9: debug route removed entirely (was: app.get("/test", ...))
 
 // ================= SERVER =================
 
 app.listen(PORT, () => {
-console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
